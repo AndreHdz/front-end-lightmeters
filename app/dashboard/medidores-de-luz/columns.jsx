@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import PulseCircle from "../../../components/ui/pulseCircle";
+import PulseCircle from "../../../components/ui/PulseCircle";
 
 export const columns = [
     {

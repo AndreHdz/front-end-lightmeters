@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { z } from 'zod';
-import PulseCircle from "../../../components/ui/pulseCircle";
+import PulseCircle from "../../../components/ui/PulseCircle";
 
 export const GabinetesSchema = z.object({
     id: z.number(),
