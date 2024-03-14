@@ -3,7 +3,7 @@
 
 import { DataTable } from "../../../components/ui/data-table"
 import { Gabinetes, columns } from "./columns"
-import PulseCircle from "../../../components/ui/pulseCircle";
+import PulseCircle from "../../../components/ui/PulseCircle";
 import { useEffect, useState } from "react";
 async function getData(){
   const res = await fetch('http://localhost:4321/api/cabinets/');
