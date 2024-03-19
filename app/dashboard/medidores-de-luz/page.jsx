@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { DataTable } from "../../../components/ui/data-table"
 import {columns} from "./columns"
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 async function getData(){
-  const res = await fetch('http://localhost:4321/api/light-meters');
+  const res = await fetch(`${apiUrl}/api/light-meters`);
   const data = await res.json();
 
   const groupedByCabinet =  data.reduce((result,item) => {

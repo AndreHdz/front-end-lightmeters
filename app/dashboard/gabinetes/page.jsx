@@ -5,8 +5,12 @@ import { DataTable } from "../../../components/ui/data-table"
 import { Gabinetes, columns } from "./columns"
 import PulseCircle from "../../../components/ui/PulseCircle";
 import { useEffect, useState } from "react";
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL
+
+
 async function getData(){
-  const res = await fetch('http://localhost:4321/api/cabinets/');
+  const res = await fetch(`${apiUrl}/api/cabinets/`);
   const data = await res.json();
   return data
 }

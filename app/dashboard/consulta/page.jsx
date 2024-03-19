@@ -30,6 +30,8 @@ import { Input } from "../../../components/ui/input"
 import Inovice from '../../../components/Inovice'
 
  
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+ 
 const formSchema = z.object({
   fechaInicio: z.string(),
   fechaFinal: z.string(),
@@ -37,7 +39,7 @@ const formSchema = z.object({
 })
 
 async function getData(){
-  const res = await fetch("http://localhost:4321/api/apartments/");
+  const res = await fetch(`${apiUrl}/api/apartments/`);
   const apartmentsData = await res.json();
   return apartmentsData;
 }
@@ -60,7 +62,7 @@ const Page = () => {
   const handleSubmit = async (values) => {
     console.log(values)
     try {
-      const res = await fetch(`http://localhost:4321/api/apartments/${values.departamento}/get-energy?startDate=${values.fechaInicio}&endDate=${values.fechaFinal}`);
+      const res = await fetch(`${apiUrl}/api/apartments/${values.departamento}/get-energy?startDate=${values.fechaInicio}&endDate=${values.fechaFinal}`);
       const data = await res.json();
       setEnergyData(data)
       console.log(data);

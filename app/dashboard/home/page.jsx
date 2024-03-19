@@ -53,14 +53,17 @@ export const dataChart = {
   ]
 };
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+
 async function getData(){
-  const res = await fetch(`http://localhost:4321/api/readings/get-energy-apartments?date=${date}`);
+  const res = await fetch(`${apiUrl}/api/readings/get-energy-apartments?date=${date}`);
   const data = await res.json();
   return data
 }
 
 async function getLightMeters(){
-  const lightMeters = await fetch("http://localhost:4321/api/light-meters/");
+  const lightMeters = await fetch(`${apiUrl}/api/light-meters/`);
   const data = await lightMeters.json();
   const filteredLightMeters = data.filter(meter => meter.status === 1);
   return {
@@ -70,7 +73,7 @@ async function getLightMeters(){
 }
 
 async function getCabinets(){
-  const cabinets = await fetch("http://localhost:4321/api/cabinets/");
+  const cabinets = await fetch(`${apiUrl}/api/cabinets/`);
   const data = await cabinets.json();
   const activeCabinets = data.filter(cabinet => cabinet.status === 1);
   return {
@@ -80,7 +83,7 @@ async function getCabinets(){
 }
 
 async function getEnergy(){
-  const data = await fetch(`http://localhost:4321/api/readings/get-energy?date=${date}`);
+  const data = await fetch(`${apiUrl}/api/readings/get-energy?date=${date}`);
   const readings =  await data.json();
   const totalEnergy = readings.reduce((total,reading) => total + reading.energy, 0);
   const formatedEnergy = totalEnergy.toFixed(2);
