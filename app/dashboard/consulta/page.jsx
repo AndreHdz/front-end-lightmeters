@@ -16,8 +16,6 @@ import {
   FormMessage,
 } from "../../../components/ui/form"
 import DashboardNumbers from "../../../components/DashboardNumbers"
-
-
 import {
   Select,
   SelectContent,
@@ -25,9 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select"
-
 import { Input } from "../../../components/ui/input"
-import Inovice from '../../../components/Inovice'
 
  
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -42,6 +38,12 @@ async function getData(){
   const res = await fetch(`${apiUrl}/api/apartments/`);
   const apartmentsData = await res.json();
   return apartmentsData;
+}
+
+async function getEnergy(values){
+  const res = await fetch(`${apiUrl}/api/apartments/${values.departamento}/get-energy?startDate=${values.fechaInicio}&endDate=${values.fechaFinal}`);
+  const data = await res.json();
+  return data
 }
 
 
@@ -60,7 +62,6 @@ const Page = () => {
   })
 
   const handleSubmit = async (values) => {
-    console.log(values)
     try {
       const res = await fetch(`${apiUrl}/api/apartments/${values.departamento}/get-energy?startDate=${values.fechaInicio}&endDate=${values.fechaFinal}`);
       const data = await res.json();
@@ -68,6 +69,27 @@ const Page = () => {
       console.log(data);
     } catch (error){
       console.error('Error:', error)
+    }
+  }
+
+  const generateInvoice = async (energyData) => {
+    try {
+      const data = {
+        "apartment_id": energyData.apartmentInfo[0].id,
+        "energy": energyData.energy.total,
+        "start_date": energyData.energy.startDate,
+        "end_date": energyData.energy.endDate
+      }
+      const res = await fetch(`${apiUrl}/api/invoices`, {
+        method : 'POST',
+        headers: {
+          'Content-Type' : 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      console.log("recibo creado")
+    } catch(error) {
+      console.error('Error al crear Recibo', error.message)
     }
   }
 
@@ -152,6 +174,13 @@ const Page = () => {
       </div>
 
       <div>
+      {
+        energyData && 
+          <>
+            <Button className="mt-5" onClick={() => generateInvoice(energyData)}>Generar Recibo</Button>
+          </>
+        
+      }
 
       </div>
 
