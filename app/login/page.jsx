@@ -34,7 +34,6 @@ const Page = () => {
 
   const handleSubmit = (values) => {
     console.log({values})
-
   }
 
   return (

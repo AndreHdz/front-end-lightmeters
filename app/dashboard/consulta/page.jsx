@@ -88,6 +88,11 @@ const Page = () => {
         body: JSON.stringify(data)
       })
       console.log("recibo creado")
+      form.reset({
+        fechaInicio: "",
+        fechaFinal: "",
+        departamento: ""
+      });
     } catch(error) {
       console.error('Error al crear Recibo', error.message)
     }

@@ -13,7 +13,9 @@ import { IoReader } from "react-icons/io5";
 import { IoLogOut } from "react-icons/io5";
 import { usePathname } from "next/navigation";
 import { Icon } from "react-icons";
-import path from "path";
+import {signOut} from "next-auth/react" 
+import { Button } from "./ui/Button";
+import { useRouter } from "next/navigation";
 
 const data = [
   {
@@ -56,6 +58,7 @@ const data = [
 
 const Navbar = () => {
   const pathname = usePathname();
+  const router = useRouter();
 
 
   return (
@@ -74,10 +77,11 @@ const Navbar = () => {
           }
             <div className="flex flex-col gap-1 absolute bottom-10">
               <div>
-                <Link href="/dashboard/configuraciones" className="flex items-center gap-1 bg-[rgba(0,0,0)] text-white rounded-md py-2 px-4 w-full"><FaGear /> Configuraciones</Link>
+                <Button onClick={()=> signOut({redirect : false}).then(() => {router.push('/')})}>Sign Out</Button>
+                <Link href="/dashboard/configuraciones" className="flex items-center gap-1 bg-[rgba(0,0,0)] text-white rounded-md py-2 px-4 w-full hidden"><FaGear /> Configuraciones</Link>
               </div>
               <div>
-                <Link href="/dashboard/configuraciones" className="flex items-center gap-1 bg-[rgba(0,0,0)] text-white rounded-md py-2 px-4 w-full"><IoLogOut /> Log Out</Link>
+                <Link href="/dashboard/configuraciones" className="flex items-center gap-1 bg-[rgba(0,0,0)] text-white rounded-md py-2 px-4 w-full hidden"><IoLogOut /> Log Out</Link>
               </div>
             </div>
         </div>
