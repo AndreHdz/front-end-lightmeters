@@ -11,6 +11,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import {formatDate} from '../../../lib/formatDate'
 
 ChartJS.register(
   CategoryScale,
@@ -22,7 +23,8 @@ ChartJS.register(
 );
 
 export const options = {
-  responsive: true,
+  //responsive: true,
+  maintainAspectRatio: false,
   plugins: {
     legend: {
       position: 'top'
@@ -33,17 +35,13 @@ export const options = {
   },
 };
 
-const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-
+const labels =  [];
 const today = new Date();
-const year = today.getFullYear();
-const month = String(today.getMonth() + 1).padStart(2, '0'); // Se agrega 1 porque los meses van de 0 a 11
-const day = String(today.getDate()).padStart(2, '0');
-const date = `${year}-${month}-${day}`;
+const date = formatDate(today);
 console.log(date);
 
 export const dataChart = {
-  labels,
+  labels : lastDaysEnergy.dates ,
   datasets: [
     {
       label: 'Kw total por día',
@@ -91,12 +89,34 @@ async function getEnergy(){
   return formatedEnergy;
 }
 
+async function getLastDaysEnergy(){
+  
+  const dates = [];
+  const energys = [];
+  for(let i = 0; i < 7; i++){
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const formatedDate = formatDate(date)
+    const data = await fetch(`${apiUrl}/api/readings/get-energy-apartments?date=${formatedDate}`)
+    const readings = await data.json();
+    const totalEnergy = readings.reduce((total,reading) => total + reading.total_energy, 0)
+    const formatedEnergy = totalEnergy.toFixed(2);
+    dates.push(formatDate);
+    energys.push(formatedEnergy)
+  }
+
+  return {dates, energys}
+}
+
+
+
 const Page = () => {
 
   const [data, setData] = useState(null);
   const [lightMeters, setLightMeters] = useState(null);
   const [cabinets, setCabinets] = useState(null);
   const [energy, setEnergy] = useState(null);
+  const [lastDaysEnergy, setLastDaysEnergy] = useState(null)
 
 
   useEffect(() => {
@@ -105,10 +125,12 @@ const Page = () => {
       const lightMeters = await getLightMeters();
       const cabinets = await getCabinets();
       const energy = await getEnergy();
+      const last7DaysEnergy = await getLastDaysEnergy();
       setEnergy(energy);
       setData(result);
       setLightMeters(lightMeters)
       setCabinets(cabinets)
+      setLastDaysEnergy(last7DaysEnergy)
     };
 
     fetchData();
@@ -130,7 +152,9 @@ const Page = () => {
       <div className="flex gap-10 mt-10">
         <div className="w-2/3 border-[1px] border-solid border-black rounded-md p-5">
           <h2>Consumo últimos 7 días</h2>
-          <Bar options={options} data={dataChart} />
+          <div className="h-[500px]">
+            <Bar options={options} data={dataChart} className=""/>
+          </div>
         </div>
         <div className="w-1/3 border-[1px] border-solid border-black rounded-md p-5">
           <h2>Consumo de apartamentos</h2>

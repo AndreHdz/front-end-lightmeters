@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
       <body className={`${inter.className}`}>
           <div className='flex gap-5'>
             <Navbar />
-            <div className='overflow-y-scroll w-full p-10 max-h-screen overflow-x-clip'>
+            <div className='overflow-y-scroll w-full p-10 h-screen'>
               {children}
             </div>
           </div>

@@ -66,6 +66,7 @@ const Page = () => {
       const res = await fetch(`${apiUrl}/api/apartments/${values.departamento}/get-energy?startDate=${values.fechaInicio}&endDate=${values.fechaFinal}`);
       const data = await res.json();
       setEnergyData(data)
+
       console.log(data);
     } catch (error){
       console.error('Error:', error)
@@ -145,6 +146,7 @@ const Page = () => {
                   </FormItem>
               }}  
               />
+              
               <FormField control={form.control} name="departamento" render={({field}) => {
                 return <FormItem>
                     <FormLabel>Departamento</FormLabel>
@@ -175,6 +177,19 @@ const Page = () => {
         </div>
         <div className='h-full'>
           <DashboardNumbers number={energyData && energyData.apartmentInfo.length > 0 ? energyData.apartmentInfo[0].apartment_number : "0"} title={energyData && energyData.apartmentInfo.length > 0 ? energyData.apartmentInfo[0].apartment_owner : "Dueño del departamento"} icon="apartment"/>
+        </div>
+        <div className=''>
+          <h2>Lecturas por medidor</h2>
+              <p><strong>Periodo:</strong> {energyData?.energy.startDate} a {energyData?.energy.endDate}</p>
+              <p><strong>Total:</strong> {energyData?.energy.total}</p>
+              {energyData?.energy?.data?.map((meter, index) => (
+                <div key={index}>
+                  <p><strong>Medidor:</strong> {meter.lightmeterSn}</p>
+                  <p><strong>Lectura {meter.energy.a.registration_date}:</strong> {meter.energy.a.energy}</p>
+                  <p><strong>Lectura {meter.energy.b.registration_date}:</strong> {meter.energy.a.energy}</p>
+                  <p><strong>Total:</strong> {meter.energyTotal}</p>
+                </div>
+              ))}
         </div>
       </div>
 
