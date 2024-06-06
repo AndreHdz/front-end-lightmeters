@@ -98,7 +98,7 @@ const Page = () => {
       });
 
       setApartments([])
-      setEnergyData(null)
+      setEnergyData()
     } catch(error) {
       console.error('Error al crear Recibo', error.message)
     }
