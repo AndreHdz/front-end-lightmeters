@@ -9,10 +9,9 @@ import { MdApartment } from "react-icons/md";
 import { BiSolidCabinet } from "react-icons/bi";
 import { SlSpeedometer } from "react-icons/sl";
 import { FaGear } from "react-icons/fa6";
-import { IoReader } from "react-icons/io5";
+import { TbReportSearch } from "react-icons/tb";
 import { IoLogOut } from "react-icons/io5";
 import { usePathname } from "next/navigation";
-import { Icon } from "react-icons";
 import {signOut} from "next-auth/react" 
 import { Button } from "./ui/Button";
 import { useRouter } from "next/navigation";
@@ -32,6 +31,12 @@ const data = [
     title: "Recibos",
     href: "/dashboard/recibos-de-luz",
     icon : <BsFillLightningChargeFill />
+  },
+  ,
+  {
+    title: "Reportes",
+    href: "/dashboard/reportes",
+    icon : <TbReportSearch />
   },
   {
     title: "Departamentos",
@@ -59,6 +64,8 @@ const data = [
 const Navbar = () => {
   const pathname = usePathname();
   const router = useRouter();
+
+
 
 
   return (

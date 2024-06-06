@@ -16,13 +16,6 @@ import {
   FormMessage,
 } from "../../../components/ui/form"
 import DashboardNumbers from "../../../components/DashboardNumbers"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../components/ui/select"
 import { Input } from "../../../components/ui/input"
 
  
@@ -62,8 +55,17 @@ const Page = () => {
   })
 
   const handleSubmit = async (values) => {
+    
+    const foundApartment = apartments.find(apartment => apartment.apartment_number === values.departamento);
+
+    if (foundApartment) {
+        console.log('ID del apartamento:', foundApartment.id);
+    } else {
+        console.log('Apartamento no encontrado.');
+    }
+
     try {
-      const res = await fetch(`${apiUrl}/api/apartments/${values.departamento}/get-energy?startDate=${values.fechaInicio}&endDate=${values.fechaFinal}`);
+      const res = await fetch(`${apiUrl}/api/apartments/${foundApartment.id}/get-energy?startDate=${values.fechaInicio}&endDate=${values.fechaFinal}`);
       const data = await res.json();
       setEnergyData(data)
 
@@ -94,6 +96,9 @@ const Page = () => {
         fechaFinal: "",
         departamento: ""
       });
+
+      setApartments([])
+      setEnergyData(null)
     } catch(error) {
       console.error('Error al crear Recibo', error.message)
     }
@@ -125,6 +130,7 @@ const Page = () => {
                       <FormLabel>Fecha de inicio</FormLabel>
                       <FormControl>
                         <Input 
+                          required
                           type="date"
                           {...field}
                         />
@@ -138,6 +144,7 @@ const Page = () => {
                     <FormLabel>Fecha de final</FormLabel>
                     <FormControl>
                       <Input 
+                        required
                         type="date"
                         {...field}
                       />
@@ -146,28 +153,22 @@ const Page = () => {
                   </FormItem>
               }}  
               />
-              
-              <FormField control={form.control} name="departamento" render={({field}) => {
+
+              <FormField control={form.control} name="departamento" render={({field})  => {
                 return <FormItem>
                     <FormLabel>Departamento</FormLabel>
-                    <Select onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona el departamento"/>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {apartments.map((depa) => {
-                          return(
-                            <SelectItem key={depa.id} value={depa.id}>{`${depa.apartment_number} - ${depa.id}`}</SelectItem>
-                          )
-                        })}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input 
+                        required
+                        type="input"
+                        {...field}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
               }}  
               />
+
             <Button type="submit" className="mt-7 w-full">Buscar</Button>
             </form>
           </Form>
@@ -178,18 +179,20 @@ const Page = () => {
         <div className='h-full'>
           <DashboardNumbers number={energyData && energyData.apartmentInfo.length > 0 ? energyData.apartmentInfo[0].apartment_number : "0"} title={energyData && energyData.apartmentInfo.length > 0 ? energyData.apartmentInfo[0].apartment_owner : "Dueño del departamento"} icon="apartment"/>
         </div>
-        <div className=''>
-          <h2>Lecturas por medidor</h2>
+        <div className='col-span-3'>
+          <h2 className='mb-2'>Lecturas por medidor</h2>
               <p><strong>Periodo:</strong> {energyData?.energy.startDate} a {energyData?.energy.endDate}</p>
               <p><strong>Total:</strong> {energyData?.energy.total}</p>
-              {energyData?.energy?.data?.map((meter, index) => (
-                <div key={index}>
-                  <p><strong>Medidor:</strong> {meter.lightmeterSn}</p>
-                  <p><strong>Lectura {meter.energy.a.registration_date}:</strong> {meter.energy.a.energy}</p>
-                  <p><strong>Lectura {meter.energy.b.registration_date}:</strong> {meter.energy.a.energy}</p>
-                  <p><strong>Total:</strong> {meter.energyTotal}</p>
-                </div>
-              ))}
+              <div className='flex gap-5 mt-2'>
+                {energyData?.energy?.data?.map((meter, index) => (
+                  <div key={index} className='border-solid border-[1px] border-[#000] rounded-md p-3 flex gap-1 flex-col'>
+                    <p><strong>Medidor:</strong> {meter.lightmeterSn}</p>
+                    <p><strong>Lectura {meter.energy.a.registration_date}:</strong> {meter.energy.a.energy}</p>
+                    <p><strong>Lectura {meter.energy.b.registration_date}:</strong> {meter.energy.b.energy}</p>
+                    <p><strong>Total:</strong> {meter.energyTotal}</p>
+                  </div>
+                ))}
+              </div>
         </div>
       </div>
 

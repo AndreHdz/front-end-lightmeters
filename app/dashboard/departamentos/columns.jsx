@@ -8,10 +8,6 @@ export const columns = [
         header : "Apartamento N."
     },
     {
-        accessorKey: "serial_numbers",
-        header : "Tipo de Medidor"
-    },
-    {
         accessorKey: "apartment_owner",
         header : "Dueño"
     },

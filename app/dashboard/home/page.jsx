@@ -12,6 +12,7 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import {formatDate} from '../../../lib/formatDate'
+import { useEnergy } from "../../hooks/useEnergy";
 
 ChartJS.register(
   CategoryScale,
@@ -21,6 +22,9 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 
 export const options = {
   //responsive: true,
@@ -35,23 +39,10 @@ export const options = {
   },
 };
 
-const labels =  [];
+
 const today = new Date();
 const date = formatDate(today);
-console.log(date);
-
-export const dataChart = {
-  labels : lastDaysEnergy.dates ,
-  datasets: [
-    {
-      label: 'Kw total por día',
-      data: [10,50,20,60,60,100,200],
-      backgroundColor: 'rgba(0, 0, 0, 0.9)',
-    }
-  ]
-};
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+//const date = '2024-05-15'
 
 
 async function getData(){
@@ -89,22 +80,18 @@ async function getEnergy(){
   return formatedEnergy;
 }
 
-async function getLastDaysEnergy(){
-  
+async function getLastDaysEnergy(today){
   const dates = [];
   const energys = [];
   for(let i = 0; i < 7; i++){
     const date = new Date(today);
     date.setDate(date.getDate() - i);
     const formatedDate = formatDate(date)
-    const data = await fetch(`${apiUrl}/api/readings/get-energy-apartments?date=${formatedDate}`)
+    const data = await fetch(`${apiUrl}/api/apartments/all-energy?date=${formatedDate}`)
     const readings = await data.json();
-    const totalEnergy = readings.reduce((total,reading) => total + reading.total_energy, 0)
-    const formatedEnergy = totalEnergy.toFixed(2);
-    dates.push(formatDate);
-    energys.push(formatedEnergy)
+    dates.push(formatedDate);
+    energys.push(readings.energySum)
   }
-
   return {dates, energys}
 }
 
@@ -112,39 +99,53 @@ async function getLastDaysEnergy(){
 
 const Page = () => {
 
+  const { allData, totalEnergy, getAllApartmentsEnergy } = useEnergy();
+  
+
+
   const [data, setData] = useState(null);
   const [lightMeters, setLightMeters] = useState(null);
   const [cabinets, setCabinets] = useState(null);
-  const [energy, setEnergy] = useState(null);
   const [lastDaysEnergy, setLastDaysEnergy] = useState(null)
 
 
   useEffect(() => {
     const fetchData = async () => {
-      const result = await getData();
+      const result = await getAllApartmentsEnergy(date);
       const lightMeters = await getLightMeters();
       const cabinets = await getCabinets();
-      const energy = await getEnergy();
-      const last7DaysEnergy = await getLastDaysEnergy();
-      setEnergy(energy);
+      const last7DaysEnergy = await getLastDaysEnergy(date);
+      
       setData(result);
       setLightMeters(lightMeters)
       setCabinets(cabinets)
       setLastDaysEnergy(last7DaysEnergy)
     };
 
+  
     fetchData();
   },[])
 
-  if(!data || !lightMeters || !cabinets || !energy){
+  const dataChart = {
+    labels : lastDaysEnergy?.dates ,
+    datasets: [
+      {
+        label: 'Kw total por día',
+        data: lastDaysEnergy?.energys,
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      }
+    ]
+  };
+
+  if(!data || !lightMeters || !cabinets){
     return "Cargando..."
   }
 
   return (
     <div>
-      <h1>Dashboard - Medidores de Luz</h1>
+      <h1>{`Dashboard - Medidores de Luz - ${date}`}</h1>
       <div className="grid grid-cols-4 gap-10">
-        <DashboardNumbers number={`${energy}kw`} title="Consumo de energía total" icon="energy" />
+        <DashboardNumbers number={`${totalEnergy}kw`} title="Consumo de energía total" icon="energy" />
         <DashboardNumbers number={`${cabinets.activeCabinets}/${cabinets.allCabinets}`} title="Estatus de Gabinetes" icon="cabinet" />
         <DashboardNumbers number={`${lightMeters.activeMeters}/${lightMeters.allMeters}`} title="Estatus de medidores" icon="meter" />
         <DashboardNumbers number={`${data[0].total_energy}kw - ${data[0].apartment_number}`} title="Consumo más alto" icon="energy" />
