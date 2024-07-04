@@ -20,11 +20,15 @@ export const columns = [
     },
     {
         accessorKey : "energy",
-        header : "Consumo de Energía",
+        header : "Energía",
     },
     {
-        accessorKey : "start_date",
-        header : "Periodo"
+        accessorKey : "formattedStartDate",
+        header : "Fecha Inicio"
+    },
+    {
+        accessorKey : "formattedEndDate",
+        header : "Fecha Fin"
     },
     {
         accesorKey : "id",

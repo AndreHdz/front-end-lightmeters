@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { DataTable } from "../../../components/ui/data-table";
 import { columns } from "./columns";
-import { useEnergy } from "../../hooks/useEnergy"
 
 
 const today = new Date();
@@ -12,16 +11,23 @@ const month = String(today.getMonth() + 1).padStart(2, '0'); // Se agrega 1 porq
 const day = String(today.getDate()).padStart(2, '0');
 const date = `${year}-${month}-${day}`;
 
+
+async function getData(){
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL
+  const res = await fetch(`${apiUrl}/api/apartments`);
+  const data = await res.json();
+  console.log(data);
+  return data
+}
+
+
 const Page = () => {
-
-  const {getAllApartmentsEnergy, totalEnergy} = useEnergy();
-
   const [data,setData] = useState(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
-      const result = await getAllApartmentsEnergy('2024-05-19');
-      console.log(totalEnergy)
+      const result = await getData();
       setData(result);
     }
     fetchData();

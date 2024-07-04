@@ -17,10 +17,10 @@ import {
 } from "../../../components/ui/form"
 import DashboardNumbers from "../../../components/DashboardNumbers"
 import { Input } from "../../../components/ui/input"
+import { toast } from 'react-toastify'  // Importa toast de react-toastify
 
- 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
- 
+
 const formSchema = z.object({
   fechaInicio: z.string(),
   fechaFinal: z.string(),
@@ -29,25 +29,26 @@ const formSchema = z.object({
 
 async function getData(){
   const res = await fetch(`${apiUrl}/api/apartments/`);
+  if (!res.ok) throw new Error('Error fetching apartments');
   const apartmentsData = await res.json();
   return apartmentsData;
 }
 
-async function getEnergy(values){
-  const res = await fetch(`${apiUrl}/api/apartments/${values.departamento}/get-energy?startDate=${values.fechaInicio}&endDate=${values.fechaFinal}`);
+async function getEnergy(departamento, fechaInicio, fechaFinal){
+  const res = await fetch(`${apiUrl}/api/apartments/${departamento}/get-energy?startDate=${fechaInicio}&endDate=${fechaFinal}`);
+  if (!res.ok) throw new Error('Error fetching energy data');
   const data = await res.json();
   return data
 }
 
-
 const Page = () => {
 
-  const [energyData, setEnergyData] = useState(null);
   const [apartments, setApartments] = useState([]);
+  const [energyData, setEnergyData] = useState(null);
 
   const form = useForm({
-    resolver : zodResolver(formSchema),
-    defaultValues : {
+    resolver: zodResolver(formSchema),
+    defaultValues: {
       fechaInicio: "",
       fechaFinal: "",
       departamento: ""
@@ -55,27 +56,33 @@ const Page = () => {
   })
 
   const handleSubmit = async (values) => {
-    
-    const foundApartment = apartments.find(apartment => apartment.apartment_number === values.departamento);
+    const { departamento, fechaInicio, fechaFinal } = values;
+
+    const foundApartment = apartments.find(apartment => apartment.apartment_number === departamento);
 
     if (foundApartment) {
         console.log('ID del apartamento:', foundApartment.id);
+        try {
+          const data = await getEnergy(foundApartment.id, fechaInicio, fechaFinal);
+          setEnergyData(data);
+          if(data.energy.total === 0 ){
+            console.error('Error fetching energy data:', error.message);
+            return
+          }
+          toast.success('Datos de energía obtenidos con éxito');  // Agrega una notificación de éxito
+          console.log(data);
+        } catch (error) {
+          console.error('Error fetching energy data:', error.message);
+          toast.error('Error al obtener datos de energía');  // Agrega una notificación de error
+        }
     } else {
-        console.log('Apartamento no encontrado.');
-    }
-
-    try {
-      const res = await fetch(`${apiUrl}/api/apartments/${foundApartment.id}/get-energy?startDate=${values.fechaInicio}&endDate=${values.fechaFinal}`);
-      const data = await res.json();
-      setEnergyData(data)
-
-      console.log(data);
-    } catch (error){
-      console.error('Error:', error)
+        toast.error('Apartamento no encontrado');  // Agrega una notificación de error si no se encuentra el apartamento
     }
   }
 
-  const generateInvoice = async (energyData) => {
+  const generateInvoice = async () => {
+    if (!energyData) return;
+
     try {
       const data = {
         "apartment_id": energyData.apartmentInfo[0].id,
@@ -84,39 +91,46 @@ const Page = () => {
         "end_date": energyData.energy.endDate
       }
       const res = await fetch(`${apiUrl}/api/invoices`, {
-        method : 'POST',
+        method: 'POST',
         headers: {
-          'Content-Type' : 'application/json'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
-      })
-      console.log("recibo creado")
+      });
+      if (!res.ok) throw new Error('Error creating invoice');
+      toast.success('Recibo creado con éxito');  // Agrega una notificación de éxito
+      console.log("Recibo creado");
+
       form.reset({
         fechaInicio: "",
         fechaFinal: "",
         departamento: ""
       });
 
-      setApartments([])
-      setEnergyData()
-    } catch(error) {
-      console.error('Error al crear Recibo', error.message)
+      // Limpia el estado después de crear un recibo
+      setEnergyData(null);
+    } catch (error) {
+      console.error('Error al crear Recibo:', error.message);
+      toast.error('Error al crear recibo');  // Agrega una notificación de error
     }
   }
 
   useEffect(() => {
     const fetchData = async () => {
-      const apartments = await getData();
-      setApartments(apartments);
+      try {
+        const apartments = await getData();
+        setApartments(apartments);
+      } catch (error) {
+        console.error('Error fetching apartments:', error.message);
+        toast.error('Error al obtener datos de apartamentos');  // Agrega una notificación de error
+      }
     }
     fetchData();
   },[])
 
-  if(!apartments){
+  if (!apartments) {
     return "Cargando..."
   }
-
-
 
   return (
     <div>
@@ -197,18 +211,10 @@ const Page = () => {
       </div>
 
       <div>
-      {
-        energyData && 
-          <>
-            <Button className="mt-5" onClick={() => generateInvoice(energyData)}>Generar Recibo</Button>
-          </>
-        
-      }
-
+        {energyData && 
+          <Button className="mt-5" onClick={generateInvoice}>Generar Recibo</Button>
+        }
       </div>
-
-
-  
     </div>
   )
 }

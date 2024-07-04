@@ -11,8 +11,14 @@ export const columns = [
         accessorKey: "apartment_owner",
         header : "Dueño"
     },
+    ,
     {
-        accessorKey: "total_energy",
-        header : "Última lectura"
-    }
+        accessorKey: "meter_type",
+        header : "Tipo de Medidor"
+    },
+    {
+        accessorKey: "serial_numbers",
+        header : "Medidores"
+    },
+
 ]
