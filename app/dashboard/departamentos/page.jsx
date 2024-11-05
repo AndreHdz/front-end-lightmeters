@@ -37,8 +37,6 @@ const Page = () => {
     return <p>Cargando...</p>
   }
 
-
-
   return (
     <div>
       <h1>Lista de Departamentos</h1>

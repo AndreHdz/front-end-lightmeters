@@ -20,5 +20,9 @@ export const columns = [
         accessorKey: "serial_numbers",
         header : "Medidores"
     },
+    {
+        accessorKey: "cabinet_ids",
+        header : "Gabinete"
+    },
 
 ]
