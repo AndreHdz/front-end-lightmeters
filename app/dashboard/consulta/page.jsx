@@ -54,31 +54,46 @@ const Page = () => {
       departamento: ""
     }
   })
-
   const handleSubmit = async (values) => {
     const { departamento, fechaInicio, fechaFinal } = values;
-
     const foundApartment = apartments.find(apartment => apartment.apartment_number === departamento);
-
+  
     if (foundApartment) {
-        console.log('ID del apartamento:', foundApartment.id);
-        try {
-          const data = await getEnergy(foundApartment.id, fechaInicio, fechaFinal);
-          setEnergyData(data);
-          if(data.energy.total === 0 ){
-            console.error('Error fetching energy data:', error.message);
-            return
+      console.log('ID del apartamento:', foundApartment.apartment_id);
+      try {
+        const data = await getEnergy(foundApartment.apartment_id, fechaInicio, fechaFinal);
+        setEnergyData(data);
+
+        let hasWarning = false;
+
+        data.energy.data.forEach((meter) => {
+          if (meter.warning) {
+            hasWarning = true;
+            toast.warning(meter.warning);  // Muestra la advertencia en Toastify si existe un warning
+            return;
           }
-          toast.success('Datos de energía obtenidos con éxito');  // Agrega una notificación de éxito
-          console.log(data);
-        } catch (error) {
-          console.error('Error fetching energy data:', error.message);
-          toast.error('Error al obtener datos de energía');  // Agrega una notificación de error
+        });
+        
+        
+        if (data.energy.data === 0) {
+          toast.error('No se encontraron datos de energía');  // Notificación de error si el total es 0
+          return;
         }
+
+        if(!hasWarning){
+          toast.success('Datos de energía obtenidos con éxito');  // Notificación de éxito
+        }
+        
+        console.log(data);
+      } catch (error) {
+        console.error('Error fetching energy data:', error.message);
+        toast.error(`Error al encontrar datos: ${error.message}`);  // Notificación de error del catch
+      }
     } else {
-        toast.error('Apartamento no encontrado');  // Agrega una notificación de error si no se encuentra el apartamento
+      toast.error('Apartamento no encontrado');  // Notificación de error si no se encuentra el apartamento
     }
-  }
+  };
+  
 
   const generateInvoice = async () => {
     if (!energyData) return;
@@ -201,8 +216,8 @@ const Page = () => {
                 {energyData?.energy?.data?.map((meter, index) => (
                   <div key={index} className='border-solid border-[1px] border-[#000] rounded-md p-3 flex gap-1 flex-col'>
                     <p><strong>Medidor:</strong> {meter.lightmeterSn}</p>
-                    <p><strong>Lectura {meter.energy.a.registration_date}:</strong> {meter.energy.a.energy}</p>
-                    <p><strong>Lectura {meter.energy.b.registration_date}:</strong> {meter.energy.b.energy}</p>
+                    <p><strong>Lectura {meter.energy.a?.registration_date || "---"}:</strong> {meter.energy.a?.energy}</p>
+                    <p><strong>Lectura {meter.energy.b?.registration_date || "---"}:</strong> {meter.energy.b?.energy}</p>
                     <p><strong>Total:</strong> {meter.energyTotal}</p>
                   </div>
                 ))}

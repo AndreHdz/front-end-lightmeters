@@ -1,4 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table'
+import Link from 'next/link'
 import {z} from 'zod'
 
 
@@ -24,5 +25,15 @@ export const columns = [
         accessorKey: "cabinet_ids",
         header : "Gabinete"
     },
+    {
+        accessorKey: "apartment_id",
+        header: "Acciones",
+        cell : ({row}) => {
+            let id = row.getValue('apartment_id')
+            return <Link href={`/dashboard/departamentos/${id}/edit`}>
+                Editar
+            </Link>
+        }
+    }
 
 ]

@@ -40,8 +40,8 @@ export const options = {
 
 
 const today = new Date();
-//const date = formatDate(today);
-const date = '2024-07-03'
+const date = formatDate(today);
+//const date = '2024-07-03'
 
 
 async function getLightMeters(){
